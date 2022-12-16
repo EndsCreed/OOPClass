@@ -2,9 +2,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.DecimalFormat;
 import javax.swing.*;
-import javax.swing.border.*;
 
-public class CConverter extends JFrame {
+class CConverter extends JFrame {
 
     public CConverter() {
         super("Cobalt Converter");
@@ -64,10 +63,7 @@ public class CConverter extends JFrame {
         // Adding bottom result
         c.gridx = 0; c.gridy = 3; c.gridwidth = 2;
         ct.add(res, c);
-
-
     }
-
 }
 
 class ComputeListener implements ActionListener {
