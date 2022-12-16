@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -9,6 +10,7 @@ public class CConverter extends JFrame {
         super("Cobalt Converter");
         buildGUI();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        pack();
         setVisible(true);
     }
 
@@ -34,6 +36,12 @@ public class CConverter extends JFrame {
         JButton quit = new JButton("Quit");
         JLabel res = new JLabel("Amount Left:");
 
+        QuitListener quitL = new QuitListener();
+        quit.addActionListener(quitL);
+
+        ComputeListener compL = new ComputeListener(coIn, yrIn, res);
+        comp.addActionListener(compL);
+
         // Adding Label Components
         c.gridx = 0; c.gridy = 0; c.gridwidth = 1; c.gridheight = 1;
         c.anchor = GridBagConstraints.WEST; c.ipady = 10;
@@ -54,7 +62,7 @@ public class CConverter extends JFrame {
         ct.add(quit, c);
 
         // Adding bottom result
-        c.gridx = 0; c.gridy = 3; c.gridwidth = 2; c.anchor = GridBagConstraints.SOUTH;
+        c.gridx = 0; c.gridy = 3; c.gridwidth = 2;
         ct.add(res, c);
 
 
@@ -63,9 +71,30 @@ public class CConverter extends JFrame {
 }
 
 class ComputeListener implements ActionListener {
+    private JTextField coIn;
+    private JTextField yrIn;
+    private JLabel resOut;
+
+    public ComputeListener(JTextField coIn, JTextField yrIn, JLabel resOut) {
+        this.coIn = coIn;
+        this.yrIn = yrIn;
+        this.resOut = resOut;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.exit(0); // Placeholder to test. This will compute later.
+        String coText = coIn.getText();
+        String yrText = yrIn.getText();
+        if (coText.equals("") || yrText.equals(""))
+            return;
+        double amount = Double.parseDouble(coIn.getText());
+        double years = Double.parseDouble(yrIn.getText());
+
+        for (int i = 0; i < years; i++) {
+            amount = amount * 0.88;
+        }
+        DecimalFormat df = new DecimalFormat("#0.0000");
+        resOut.setText("Amount Left: " + df.format(amount));
     }
 }
 
