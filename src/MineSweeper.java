@@ -231,8 +231,10 @@ class CellListener implements ActionListener {
             for (int relX = -1; relX < 2; relX++) {
                 for (int relY = -1; relY < 2; relY++) {
                     try {
-                        if (MineSweeper.field[x + relX][y + relY].isSafe() &&
-                            !MineSweeper.field[x + relX][y + relY].isPopped())
+                        if (!MineSweeper.field[x + relX][y + relY].isPopped() && !MineSweeper.field[x + relX][y + relY].isMine())
+                            // if the cell we're checking has 0 mines around it (As per the if statement above the for loops)
+                            // isn't popped, and isn't a mine. it can be clicked.
+                            // This allows for all 0s and 1 layer of non 0s to be shown.
                             MineSweeper.field[x + relX][y + relY].getButton().doClick();
                     } catch (ArrayIndexOutOfBoundsException ignored) {}
                 }
