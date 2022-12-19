@@ -7,6 +7,8 @@ import javax.swing.*;
 
 public class MineSweeper {
     public static Cell[][] field;
+    public static int cellsPopped = 0;
+    public static int nonMines = 0;
 
     public static void main(String[] args) {
         MSweep ms = new MSweep();
@@ -53,6 +55,14 @@ class MSweep extends JFrame {
         setVisible(true);
     }
 
+    public MSweep(String state) {
+        super("Game Over!");
+        buildGUI(state);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(200, 200);
+        setVisible(true);
+    }
+
     public void initField() {
         this.field = new Cell[size][size];
     }
@@ -69,13 +79,13 @@ class MSweep extends JFrame {
         c.gridwidth = 1;
         c.gridheight = 1;
         c.anchor = GridBagConstraints.CENTER;
-        c.insets = new Insets(10, 10, 10, 10);
+        c.insets = new Insets(0, 0, 0, 0);
         c.fill = GridBagConstraints.BOTH;
 
         // Start loop for inserting cells
         for (int x = 0; x < this.size; x++) {
             for (int y = 0; y < this.size; y++) {
-                JButton currentButton = new JButton(" ");
+                JButton currentButton = new JButton("  ");
                 if (calcMine()) {
                     field[x][y] = new Cell(x, y, currentButton, true);
                     System.out.println("Mine at: " + x + ", " + y);
@@ -91,6 +101,27 @@ class MSweep extends JFrame {
             }
         }
         MineSweeper.field = this.field;
+        MineSweeper.nonMines = this.nonMines;
+    }
+
+    public void buildGUI(String gameState) {
+        if (gameState.equalsIgnoreCase("win")) {
+            Container ct = getContentPane();
+            ct.setLayout(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+
+            // General Constraints
+            c.anchor = GridBagConstraints.CENTER;
+            c.insets = new Insets(5, 5, 5, 5);
+            c.fill = GridBagConstraints.BOTH;
+            c.gridx = 0;
+            c.gridy = 0;
+            JLabel results = new JLabel("You lost :(");
+            if (gameState.equalsIgnoreCase("win")) {
+                results.setText("You won!");
+            }
+            ct.add(results, c);
+        }
     }
 
     // Getters
@@ -179,13 +210,21 @@ class CellListener implements ActionListener {
     }
     @Override
     public void actionPerformed(ActionEvent e) throws ArrayIndexOutOfBoundsException {
-        if (in.isMine())
-            System.exit(0);
+        if (in.isMine()) {
+            MSweep lost = new MSweep("lost");
+            return;
+        }
         if (in.isPopped())
             return;
         // Otherwise scan around for mines and set display appropriately.
         in.pop();
+        MineSweeper.cellsPopped++;
         in.getButton().setText(in.mineSweep() + "");
+        // Check for game win
+        if (MineSweeper.cellsPopped == MineSweeper.nonMines) {
+            MSweep win = new MSweep("win");
+            return;
+        }
         if (in.mineSweep() == 0) {
             int x = in.getX();
             int y = in.getY();
