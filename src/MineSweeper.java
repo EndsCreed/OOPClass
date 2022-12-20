@@ -14,7 +14,7 @@ public class MineSweeper {
     public static int nonMines = 0;
 
     public static void main(String[] args) {
-        MSweep ms = new MSweep(11, 2);
+        MSweep ms = new MSweep(15, 2);
     }
 }
 
