@@ -1,24 +1,27 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.logging.Logger;
 import javax.swing.*;
 
 public class MineSweeper {
     public static Cell[][] field;
+    public static ArrayList<JButton> mines;
     public static int cellsPopped = 0;
     public static int nonMines = 0;
 
     public static void main(String[] args) {
-        MSweep ms = new MSweep();
+        MSweep ms = new MSweep(11, 2);
     }
 }
 
 class MSweep extends JFrame {
     private int size;
     private int diffMult;
-    private int mines;
+    private ArrayList<JButton> mines = new ArrayList<>();
     private int nonMines;
     private Cell[][] field;
 
@@ -30,6 +33,7 @@ class MSweep extends JFrame {
         buildGUI();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
+        setSize((int) getSize().getWidth() + 10, (int) getSize().getHeight() + 10);
         setVisible(true);
     }
 
@@ -41,6 +45,7 @@ class MSweep extends JFrame {
         buildGUI();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
+        setSize((int) getSize().getWidth() + 10, (int) getSize().getHeight() + 10);
         setVisible(true);
     }
 
@@ -52,6 +57,7 @@ class MSweep extends JFrame {
         buildGUI();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
+        setSize((int) getSize().getWidth() + 10, (int) getSize().getHeight() + 10);
         setVisible(true);
     }
 
@@ -60,6 +66,7 @@ class MSweep extends JFrame {
         buildGUI(state);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(200, 200);
+        setSize((int) getSize().getWidth() + 10, (int) getSize().getHeight() + 10);
         setVisible(true);
     }
 
@@ -82,12 +89,29 @@ class MSweep extends JFrame {
         c.insets = new Insets(0, 0, 0, 0);
         c.fill = GridBagConstraints.BOTH;
 
+        MouseListener mouseListener = new MouseAdapter() { // Right click listener
+            @Override
+            public void mousePressed(MouseEvent e) {
+                super.mousePressed(e);
+                if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) {
+                    System.out.println("Button 2 clicked!");
+                    JButton button = (JButton) e.getComponent();
+                    if (button.getText().equalsIgnoreCase("   ")) {
+                        button.setText("\uD83D\uDCA3");
+                    } else if (button.getText().equalsIgnoreCase("\uD83D\uDCA3")) {
+                        button.setText("   ");
+                    }
+                }
+            }
+        };
+
         // Start loop for inserting cells
         for (int x = 0; x < this.size; x++) {
             for (int y = 0; y < this.size; y++) {
-                JButton currentButton = new JButton("  ");
+                JButton currentButton = new JButton("   ");
                 if (calcMine()) {
                     field[x][y] = new Cell(x, y, currentButton, true);
+                    mines.add(currentButton);
                     System.out.println("Mine at: " + x + ", " + y);
                 } else {
                     field[x][y] = new Cell(x, y, currentButton, false);
@@ -95,6 +119,7 @@ class MSweep extends JFrame {
                 }
                 currentButton = getCell(x, y).getButton();
                 currentButton.addActionListener(new CellListener(getCell(x, y)));
+                currentButton.addMouseListener(mouseListener);
                 c.gridx = x;
                 c.gridy = y;
                 ct.add(currentButton, c);
@@ -102,6 +127,7 @@ class MSweep extends JFrame {
         }
         MineSweeper.field = this.field;
         MineSweeper.nonMines = this.nonMines;
+        MineSweeper.mines = this.mines;
     }
 
     public void buildGUI(String gameState) {
@@ -116,7 +142,7 @@ class MSweep extends JFrame {
             c.fill = GridBagConstraints.BOTH;
             c.gridx = 0;
             c.gridy = 0;
-            JLabel results = new JLabel("You lost :(");
+            JLabel results = new JLabel("You lost.");
             if (gameState.equalsIgnoreCase("win")) {
                 results.setText("You won!");
             }
@@ -136,7 +162,6 @@ class MSweep extends JFrame {
         double percentMines = ((0.05 * diffMult) + variance);
         double test = ran.nextDouble();
         if (test < percentMines) {
-            this.mines++;
             return true;
         }
         // System.out.println("Double genned: " + test + "\nChecked against: " + percentMines);
@@ -169,6 +194,8 @@ class Cell {
         for (int relX = -1; relX < 2; relX++) {
             for (int relY = -1; relY < 2; relY++) {
                 try {
+                    if (MineSweeper.field[x + relX][y + relY].isPopped())
+                        continue;
                     if (MineSweeper.field[x + relX][y + relY].isMine())
                         mines++;
                 } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -182,6 +209,8 @@ class Cell {
         for (int relX = -1; relX < 2; relX++) {
             for (int relY = -1; relY < 2; relY++) {
                 try {
+                    if (MineSweeper.field[x + relX][y + relY].isPopped())
+                        continue;
                     if (MineSweeper.field[x + relX][y + relY].isMine())
                         return false;
                 } catch (ArrayIndexOutOfBoundsException ignored) {
@@ -211,6 +240,9 @@ class CellListener implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) throws ArrayIndexOutOfBoundsException {
         if (in.isMine()) {
+            in.getButton().setText("\uD83D\uDCA5");
+            for (JButton b : MineSweeper.mines)
+                b.setText("\uD83D\uDCA5");
             MSweep lost = new MSweep("lost");
             return;
         }
